@@ -25,6 +25,10 @@ var switchtostaked = true;
 var collection = 'rarecitynfts';
 var switchtoshop = false;
 var canclick = false;
+var mainDiv = document.getElementById("maindiv");
+var loader = document.getElementById('loader').style;
+var lvlloader = document.getElementById('lvlloader').style;
+var overflow = document.getElementById('body').style;
 
 async function main() {
 
@@ -33,7 +37,8 @@ async function main() {
   else {
 
     clearUi();
-    document.getElementById('loader').style.display = "block";
+    loader.display = "block";
+    lvlloader.display = "none";
 
     ratespromise = GetRates();
     rates = await ratespromise;
@@ -61,6 +66,7 @@ async function main() {
 
     unstaked = FilterUnstaked(assets, staked);
     !switchtoshop?PopulateMenu(rates,staked, unstaked, user, balance):PopulateShop(pack_data);
+    overflow.overflowY = "visible";
     canclick = true;
     console.log("ui " + new Date().toUTCString());
   }
@@ -144,6 +150,7 @@ async function buypack(template,price,qty){
     HideMessage();
 
     try {
+      totalPrice = (price * qty).toFixed(4);
       const result = await wallet_transact([{
         account: "rarecitytokn",
         name: "transfer",
@@ -154,12 +161,12 @@ async function buypack(template,price,qty){
         data: {
           from: wallet_userAccount,
           to: marketContract,
-          quantity: price.toString() + " RAREX", 
+          quantity: totalPrice.toString() + " "+ symbol, 
           memo: template + "%pack"
         },
       }, ]);
-      main();
       ShowToast("Pack bought successfully - " + result.transaction_id);
+      main();
     } catch (e) {
       ShowToast(e.message);
     }
@@ -169,39 +176,92 @@ async function buypack(template,price,qty){
   }
 }
 
-async function levelup(assetId) {
+function delay(delayInms) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(2);
+    }, delayInms);
+  });
+}
+
+async function levelup(assetId,price) {
 
   if (loggedIn) {
 
     HideMessage();
 
     try {
-
+      price = parseInt(price).toFixed(4);
       const result = await wallet_transact([{
-        account: contract,
-        name: "upgradelevel",
+        account: "rarecitytokn",
+        name: "transfer",
         authorization: [{
           actor: wallet_userAccount,
           permission: anchorAuth
         }],
         data: {
-          asset_id: assetId,
-          owner: wallet_userAccount,
-          level: "",
-          quantity: ""
+          from: wallet_userAccount,
+          to: marketContract,
+          quantity: price.toString() + " " +  symbol, 
+          memo: assetId + "%levelup"
         },
       }, ]);
-      ShowToast("Leveled Up Successfully");
-      main();
+      document.getElementById('maindiv').style.display = "none";
+      document.getElementById('staking').style.display = "none";
+      lvlloader.display = "block";
+      await delay(3500);
+      checklevelup(assetId);
     } catch (e) {
       ShowToast(e.message);
     }
-
   } else {
     WalletListVisible(true);
   }
 }
 
+async function checklevelup(assetid){
+  var path = "/v1/chain/get_table_rows";
+    var data = JSON.stringify({
+      json: true,
+      code: marketContract,
+      scope: marketContract,
+      table: "upgrades",
+      lower_bound: assetid,
+      upper_bound: assetid,
+      limit: 1,
+    });
+
+    const response = await fetch("https://" + endpoint + path, {
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      body: data,
+      method: "POST",
+    });
+
+    const body = await response.json();
+    if(body.rows.length != 0){
+      if(body.rows[0].user == wallet_userAccount && body.rows[0].asset_id == assetid){
+        if(body.rows[0].success == "failed"){
+          ShowToast("Level Up Failed :( Retry Again !");
+          lvlloader.display = "none";
+          document.getElementById('maindiv').style.display = "block";
+          document.getElementById('staking').style.display = "block";
+          return;
+        }
+        else if(body.rows[0].success == "checking"){
+          ShowToast("Checking Again ! Taking Longer Time than Usual");
+          await delay(1050);
+          checklevelup(assetid);
+        }
+      }
+    }
+    else if(body.rows.length == 0 ){
+      ShowToast("Leveled Up Successfully");
+      main();
+    }
+    
+}
 
 async function assetunstake(assetId) {
   if (loggedIn) {
@@ -253,7 +313,9 @@ async function claimbalance() {
         data: data1,
       }, ]);
       ShowToast("Reward Claimed Successfully !");
-      main();
+      balancepromise = GetBalance();
+      balance = await balancepromise;
+      document.getElementById('balance').innerHTML = balance.toLocaleString('en-US') + " " + symbol;
     } catch (e) {
       ShowToast(e.message);
     }
@@ -261,7 +323,6 @@ async function claimbalance() {
   } else {
     WalletListVisible(true);
   }
-  main();
 }
 
 function FilterUnstaked(assets, staked) {
@@ -491,7 +552,7 @@ async function GetBalance() {
     code: "rarecitytokn",
     scope: wallet_userAccount,
     table: "accounts",
-    limit: 300,
+    limit: 1000,
   });
 
   const response = await fetch("https://" + endpoint + path, {
@@ -506,7 +567,7 @@ async function GetBalance() {
 
   if (body.rows.length != 0) {
     for (j = 0; j < body.rows.length; j++) {
-      if (body.rows[j].balance.includes("RAREX"))
+      if (body.rows[j].balance.includes(symbol))
         balance = Math.floor(parseFloat(body.rows[j].balance));
     }
   }
@@ -579,12 +640,11 @@ async function GetTemplateData(colc, id){
 
 function PopulateShop(pack_data){
   let src = "https://ipfs.wecan.dev/ipfs/";
-  mainDiv = document.getElementById("maindiv");
 
   for(var index = 0; index < pack_data.length; ++index){
 
     var items = document.createElement('div');
-    items.id = "itemwrapper";
+    items.className = "itemwrapper";
 
     var div = document.createElement('div');
     div.id = 'tablecontainer';
@@ -610,7 +670,7 @@ function PopulateShop(pack_data){
     rate.className = 'ratesText';
     rate.textContent = pack_data[index].price;
     var sym = document.createElement('p');
-    sym.textContent = "RARc";
+    sym.textContent = symbol;
 
     var div5 = document.createElement('div');
     div5.className = 'ratediv';
@@ -644,7 +704,7 @@ function PopulateShop(pack_data){
     div.appendChild(items);
     mainDiv.appendChild(div);
   }
-  document.getElementById('loader').style.display = "none";
+  loader.display = "none";
   mainDiv.style.display = "block";
 
 }
@@ -653,7 +713,6 @@ function PopulateShop(pack_data){
 function PopulateMenu(rates,staked, unstakeasset, user, balance) {
   let src = "https://ipfs.wecan.dev/ipfs/";
   var unstaked = switchtostaked ? staked : unstakeasset;
-  mainDiv = document.getElementById("maindiv");
   var pools = "";
   var ids = [];
 
@@ -661,7 +720,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     ids.push(parseInt(unstaked[i].asset_id));
   }
 
-  document.getElementById('balance').innerHTML = balance + " RARc";
+  document.getElementById('balance').innerHTML = balance.toLocaleString('en-US') + " " + symbol;
   colls = document.getElementById('sidebar-content');
   for(var index = 0; index < rates.length; index++){
     pools += '<div><button class = "collectonsbtn" id='+rates[index].pool+' onclick="switchtodiffcoll('+rates[index].pool+')">';
@@ -671,7 +730,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
   colls.innerHTML = pools;
 
   if(unstaked.length < 1){
-    document.getElementById('loader').style.display = "none";
+    loader.display = "none";
     document.getElementById('staking').style.display = "block";
     ShowToast("No Assets To Display !");
     return;
@@ -680,7 +739,8 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
   for (var index = 0; index < unstaked.length; ++index) {
   
     var items = document.createElement('div');
-    items.id = "itemwrapper";
+    items.className = "itemwrapper";
+    items.id = index;
 
     var div = document.createElement('div');
     div.id = 'tablecontainer';
@@ -697,7 +757,8 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     level.textContent = "LEVEL : " + unstaked[index].level_;
     var leveln = document.createElement('p');
     leveln.className = "n";
-    leveln.textContent = unstaked[index].price;
+    leveln.id = unstaked[index].price;
+    leveln.textContent = unstaked[index].price.toLocaleString('en-US');
     topbar.appendChild(level);
     switchtostaked?topbar.appendChild(leveln):"";
     items.appendChild(topbar);
@@ -725,10 +786,9 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     rate.className = 'ratesText';
     rate.textContent = unstaked[index].rateperday.toFixed(4);
     var sym = document.createElement('p');
-    sym.textContent = "RARc";
+    sym.textContent = symbol;
     div4.appendChild(rate);div4.appendChild(sym);
     container.appendChild(div4);
-
     items.appendChild(container);
 
     var bar = document.createElement('div');
@@ -742,20 +802,19 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
       !switchtostaked?stakeasset(stkbtn.id):assetunstake(stkbtn.id);};
     let levelbtn = document.createElement('BUTTON');
     levelbtn.textContent = 'Level UP';
+    levelbtn.id = unstaked[index].price;
     levelbtn.className = "levelbtn";
     levelbtn.onclick = async function level(){
-      //id = div2.textContent;
-      //await levelup(id);
+      levelup(stkbtn.id,levelbtn.id);
     };
     bar.appendChild(stkbtn);
     if(switchtostaked)bar.appendChild(levelbtn);
-
     items.appendChild(bar);
     div.appendChild(items);
     mainDiv.appendChild(div);
     }
 
-    document.getElementById('loader').style.display = "none";
+    loader.display = "none";
     document.getElementById('staking').style.display = "block";
     mainDiv.style.display = "block";
 }
@@ -776,19 +835,22 @@ function switchshop(index) {
     document.getElementById(ele).style.display = "block";
     clearUi();
     !switchtoshop?PopulateMenu(rates, staked, unstaked, user, balance):PopulateShop(pack_data);
+    overflow.overflowY = "visible";
   }
 }
 
 function switchtodiffcoll(index){
-  collection = index.id;
-  switchtoshop?switchshop(false):'';
-  main();
+  if(collection != index.id){
+    collection = index.id;
+    switchtoshop?switchshop(false):'';
+    main();
+  }
 }
 
 function clearUi(){
   document.getElementById('staking').style.display = "none";
-  mainDiv = document.getElementById("maindiv");
   mainDiv.style.display = "none";
+  overflow.overflowY = "hidden";
   if(mainDiv.children.length >=1){
     var child = mainDiv.lastElementChild;
     while (child) {

@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="mainstyle.css">
   <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Oswald" />
 </head>
-<body>
+<body id="body">
     <div>
     <div id="toast" style="visibility: hidden"></div>
     <div class="nav-container">
@@ -19,13 +19,13 @@
             <nav>
                 <div class="logo">
                     <a href="#">
-                        <img src="./assets/Logo.png" alt="">
+                        <img class="logoimg" src="./assets/Logo.png" alt="">
                     </a>
                 </div>
                 <ul class="nav-items">
                     <li>
-                        <div id="blc" style="display: none;">
-                            <input src="./assets/Token.png" type="image"><br>
+                        <div id="blc" class="blc" style="display: none;">
+                            <input class="img" src="./assets/Token.png" type="image"><br>
                             <p id="balance" class="balance">0.0000 RARc</p>
                         </div>
                     </li>
@@ -53,11 +53,14 @@
         </div>
         </div>
             <div class="main-content">
-                <div id ="loader" style="display: none;">
-                    <div id="load">
-                        <p class="loadingText">Loading ...</p>
-                        <div class="lds-circle"><div></div></div>
-                    </div>
+                <div id="loader" style="display: none;">
+                    <p class="loadingText">Loading ...</p>
+                    <div class="lds-circle"><div></div></div>
+                </div>
+                <div id="lvlloader" style="display: none;">
+                    <img id="lvlimg" style="" src="https://media4.giphy.com/media/St3iie3VZ65VHkobqc/giphy.gif?cid=ecf05e47r7wicv168mlzdsa4bzdvh8jtxpzpodg5g5a69q5j&rid=giphy.gif&ct=g">
+                    <p class="loadingText">Loading ...</p>
+                    <div class="lds-circle"><div></div></div>
                 </div>
                 <div class="secondheader">
                     <ul>
@@ -90,6 +93,7 @@
     <script> 
         const contract = "rarecitystax";
         const marketContract = "rarecitymrkt";
+        const symbol = "RAREX";
     </script>
     <script src="./main.js"></script>
     </div>
