@@ -209,7 +209,7 @@ async function levelup(assetId,price) {
       document.getElementById('staking').style.display = "none";
       lvlloader.display = "block";
       await delay(3500);
-      checklevelup(assetId);
+      checklevelup(assetId,0);
     } catch (e) {
       ShowToast(e.message);
     }
@@ -218,7 +218,7 @@ async function levelup(assetId,price) {
   }
 }
 
-async function checklevelup(assetid){
+async function checklevelup(assetid,count){
   var path = "/v1/chain/get_table_rows";
     var data = JSON.stringify({
       json: true,
@@ -239,6 +239,7 @@ async function checklevelup(assetid){
     });
 
     const body = await response.json();
+    count += 1;
     if(body.rows.length != 0){
       if(body.rows[0].user == wallet_userAccount && body.rows[0].asset_id == assetid){
         if(body.rows[0].success == "failed"){
@@ -250,8 +251,14 @@ async function checklevelup(assetid){
         }
         else if(body.rows[0].success == "checking"){
           ShowToast("Checking Again ! Taking Longer Time than Usual");
-          await delay(1050);
-          checklevelup(assetid);
+          if(count < 5){
+            await delay(1050);
+            checklevelup(assetid,count);
+          }
+          else if(count >= 5){
+            ShowToast("Level Up Failed :( Retry Again !");
+            main();
+          }
         }
       }
     }
@@ -270,7 +277,7 @@ async function assetunstake(assetId) {
     try {
 
       var data1 = {
-        asset_id: [assetId]
+        asset_ids: [assetId]
       };
       const result = await wallet_transact([{
         account: contract,
@@ -760,7 +767,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     leveln.textContent = unstaked[index].price.toLocaleString('en-US');
     topbar.appendChild(level);
     switchtostaked?topbar.appendChild(leveln):"";
-    items.appendChild(topbar);
+    collection == "rarecitynfts"?items.appendChild(topbar):"";
 
     img2 = document.createElement('img');
     img2.src = src + unstaked[index].img;
@@ -798,7 +805,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     stkbtn.textContent = !switchtostaked?'Stake':'Unstake';
     stkbtn.className = "stkbtn";
     stkbtn.onclick = async function s(){
-      !switchtostaked?stakeasset(stkbtn.id):assetunstake(stkbtn.id);};
+    !switchtostaked?stakeasset(stkbtn.id):assetunstake(stkbtn.id);};
     let levelbtn = document.createElement('BUTTON');
     levelbtn.textContent = 'Level UP';
     levelbtn.id = unstaked[index].price;
@@ -807,7 +814,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
       levelup(stkbtn.id,levelbtn.id);
     };
     bar.appendChild(stkbtn);
-    if(switchtostaked)bar.appendChild(levelbtn);
+    if(switchtostaked && collection == "rarecitynfts")bar.appendChild(levelbtn);
     items.appendChild(bar);
     div.appendChild(items);
     mainDiv.appendChild(div);
