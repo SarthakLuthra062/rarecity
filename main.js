@@ -66,7 +66,6 @@ async function main() {
 
     unstaked = FilterUnstaked(assets, staked);
     !switchtoshop?PopulateMenu(rates,staked, unstaked, user, balance):PopulateShop(pack_data);
-    overflow.overflowY = "visible";
     canclick = true;
     console.log("ui " + new Date().toUTCString());
   }
@@ -816,6 +815,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
 
     loader.display = "none";
     document.getElementById('staking').style.display = "block";
+    overflow.overflowY = "visible";
     mainDiv.style.display = "block";
 }
 
