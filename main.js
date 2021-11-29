@@ -734,6 +734,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     pools += '<p class = "pool">' + rates[index].pool + '</p></div>';
   }
   colls.innerHTML = pools;
+  overflow.overflowY = "visible";
 
   if(unstaked.length < 1){
     loader.display = "none";
@@ -764,7 +765,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     var leveln = document.createElement('p');
     leveln.className = "n";
     leveln.id = unstaked[index].price;
-    leveln.textContent = unstaked[index].price.toLocaleString('en-US');
+    leveln.textContent = unstaked[index].level_ != 10?unstaked[index].price.toLocaleString('en-US'):"Max Level";
     topbar.appendChild(level);
     switchtostaked?topbar.appendChild(leveln):"";
     collection == "rarecitynfts"?items.appendChild(topbar):"";
@@ -814,7 +815,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
       levelup(stkbtn.id,levelbtn.id);
     };
     bar.appendChild(stkbtn);
-    if(switchtostaked && collection == "rarecitynfts")bar.appendChild(levelbtn);
+    if(switchtostaked && collection == "rarecitynfts" && unstaked[index].level_ != "10")bar.appendChild(levelbtn);
     items.appendChild(bar);
     div.appendChild(items);
     mainDiv.appendChild(div);
@@ -822,7 +823,6 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
 
     loader.display = "none";
     document.getElementById('staking').style.display = "block";
-    overflow.overflowY = "visible";
     mainDiv.style.display = "block";
 }
 
