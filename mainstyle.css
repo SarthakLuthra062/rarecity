@@ -544,18 +544,13 @@
        
 
 @media only screen and (max-width: 700px) {
-
-    nav{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: auto;
-    }
     
     .nav-items{
-        width: fit-content;
-        right: 2px;
-        left: 90px;
+        left: 80px;
+    }
+
+    .nav-items li{
+        margin-right: 40px;
     }
 
     .logoimg{
@@ -570,12 +565,13 @@
     }
 
     .blc{
-        width: 100px;
-        margin-right: -30px;
+        width: 15px;
     }
 
     .balance{
-        font-size: 12px;
+        margin-top: 10px;
+        font-size: 14px;
+        width: 120px;
     }
 
     .img{
@@ -591,7 +587,9 @@
     }
 
     .stakeAllbtn{
-        width: 120px;
+        margin-left: auto;
+        width: 150px;
+        height: 42px;
     }
 
     .maindiv{
@@ -617,7 +615,7 @@
     }
 
     body{
-        overflow-x: visible;
+        overflow-x: hidden;
     }
 }
   
