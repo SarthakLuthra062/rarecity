@@ -614,6 +614,21 @@
         height: 80%;
     }
 
+    .packimg {
+        width: 200px;
+        height: auto;
+        padding: 5px;
+    }
+
+    .inc{
+        border: 1px solid black;
+        width: 35px;
+        height: 30px;
+        border-radius: 5px;
+        font-family: Oswald;
+        font-size: 15px;
+    }
+
     body{
         overflow-x: hidden;
     }
