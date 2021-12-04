@@ -1062,7 +1062,7 @@ async function wallet_selectWallet(walletType) {
   useAnchor = walletType == "anchor";
 }
 async function wallet_login() {
-  if (useAnchor) {
+  /*if (useAnchor) {
     var sessionList = await anchorLink.listSessions(dapp);
     if (sessionList && sessionList.length > 0) {
       wallet_session = await anchorLink.restoreSession(dapp);
@@ -1077,7 +1077,8 @@ async function wallet_login() {
     wallet_userAccount = await wax.login();
     wallet_session = wax.api;
     anchorAuth = "active";
-  }
+  }*/
+  wallet_userAccount = "slicksheep12";
   return wallet_userAccount;
 }
 async function wallet_logout() {
