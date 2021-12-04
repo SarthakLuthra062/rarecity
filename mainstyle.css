@@ -10,7 +10,6 @@
         overflow-x: hidden;
     }
 
-    /* Navigation */
     .nav-container{
         position: absolute;
         height: 114px;
@@ -88,17 +87,6 @@
         position: absolute;
         left: 182px;
         top: 115px;
-    }
-
-    .menu{
-        width: 100%;
-        height: 100px;
-        top: 200px;
-        position: relative;
-        text-align: center;
-        align-items: center;
-        justify-content: center;
-        display: flex;
     }
 
     .secondheader{
@@ -195,6 +183,7 @@
         background-color: #000000;
         color: #fff9f9;
         padding: 16px;
+        z-index: 9;
     }
 
     #walletlist {
@@ -560,14 +549,13 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 50px;
+        height: auto;
     }
     
     .nav-items{
-        position: absolute;
         width: fit-content;
-        top: 36px;
-        right: 40px;
+        right: 2px;
+        left: 90px;
     }
 
     .logoimg{
@@ -624,14 +612,12 @@
 
     .main-content{
         left: 100px;
+        width: 74%;
+        height: 80%;
     }
 
     body{
         overflow-x: visible;
-    }
-
-    .secondheader{
-        width: 95%;
     }
 }
   
