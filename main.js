@@ -1,22 +1,22 @@
 const wax = new waxjs.WaxJS({
-  rpcEndpoint: 'https://waxtestnet.greymass.com',
+  rpcEndpoint: 'https://wax.greymass.com',
   tryAutoLogin: false
 });
 const transport = new AnchorLinkBrowserTransport();
 const anchorLink = new AnchorLink({
   transport,
   chains: [{
-    chainId: 'f16b1833c747c43682f4386fca9cbb327929334a762755ebec17f6f23c9b8a12',
-    nodeUrl: 'https://waxtestnet.greymass.com',
+    chainId: '1064487b3cd1a897ce03ae5b6a865651747e2e152090f99c1d19d44e01aea5a4',
+    nodeUrl: 'https://wax.greymass.com',
   }],
 });
 const dapp = "RareCity";
-const endpoint = "testnet.wax.pink.gg";
+const endpoint = "wax.pink.gg";
 const tokenContract = {
   WAX: "eosio.token"
 };
 
-
+var t = 0;
 
 var anchorAuth = "owner";
 main();
@@ -354,8 +354,8 @@ async function FilterStaked(assets) {
     var path = "/v1/chain/get_table_rows";
     var data = JSON.stringify({
       json: true,
-      code: "rarecitystax",
-      scope: "rarecitystax",
+      code: "rarecitydapp",
+      scope: "rarecitydapp",
       table: "nfts",
       lower_bound: assets[i].asset_id,
       upper_bound: assets[i].asset_id,
@@ -387,8 +387,8 @@ async function GetUser(rates) {
 
   var data = JSON.stringify({
     json: true,
-    code: "rarecitystax",
-    scope: "rarecitystax",
+    code: "rarecitydapp",
+    scope: "rarecitydapp",
     table: "user",
     limit: 1,
     lower_bound: wallet_userAccount,
@@ -410,29 +410,58 @@ async function GetUser(rates) {
     unclaimed_amount: 0,
   };
   if (body.rows.length != 0) {
-
-    if (body.rows[0].account = wallet_userAccount) {
-      for (let j = 0; j < body.rows[0].data.length; j++) {
-        for (let k = 0; k < body.rows[0].data[j].inventory.length; k++) {
-          for (let m = 0; m < rates[0].levels.length; m++) {
-            if (body.rows[0].data[j].inventory[k].key == rates[0].levels[m].key) {
-              user.stakePower += body.rows[0].data[j].inventory[k].value * rates[0].levels[m].value;
-            }
-          }
-        }
-      }
+    for (let j = 0; j < body.rows[0].data.length; j++) {
+    var datex=Date(body.rows[0].data[j].last_claim);
+    var now= new Date();
+    var date=Math.floor(now/1000);    
+    const utcMilllisecondsSinceEpoch = now.getTime() 
+    const utcSecondsSinceEpoch = Math.round(utcMilllisecondsSinceEpoch / 1000) 
+    
+    var ts = -utcSecondsSinceEpoch+ 3600+ body.rows[0].data[j].last_claim;
+    user.next_claim=ts;
     }
+    if(t!=0)
+    restartTimer();
+
+   startTimer(ts);
 
   }
+
+
   return user;
 
 
 }
 
+function startTimer(duration) {
+  var timer = duration, minutes, seconds;
+  if(t!=0) restartTimer(t);
+  t=setInterval(function () {
+      hours=  parseInt(timer / 3600, 10)
+      minutes = parseInt((timer-hours*3600) / 60,10);
+      seconds = parseInt(timer % 60, 10);
+
+      hours = hours < 10 ? "0" + hours : hours;
+
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds; 
+      display= minutes+":"+seconds;
+      document.getElementById("timetor").innerHTML=display;
+      if (--timer < 0) {
+          timer =0;
+      }
+  },1000);
+}
+
+function restartTimer(t)
+{
+clearInterval(t);
+}
+
 async function GetAssets(colc,rates) {
   let results = [];
   var path = "atomicassets/v1/assets?collection_name=" + colc + "&owner=" + wallet_userAccount + "&page=1&limit=1000&order=desc&sort=asset_id";
-  const response = await fetch("https://" + "test.wax.api.atomicassets.io/" + path, {
+  const response = await fetch("https://" + "wax.api.atomicassets.io/" + path, {
     headers: {
       "Content-Type": "text/plain"
     },
@@ -484,8 +513,8 @@ async function GetRates() {
 
   var data = JSON.stringify({
     json: true,
-    code: "rarecitystax",
-    scope: "rarecitystax",
+    code: "rarecitydapp",
+    scope: "rarecitydapp",
     table: "collections",
     limit: 1000,
   });
@@ -519,8 +548,8 @@ async function GetStakingTableRows() {
 
   var data = JSON.stringify({
     json: true,
-    code: "rarecitystax",
-    scope: "rarecitystax",
+    code: "rarecitydapp",
+    scope: "rarecitydapp",
     table: "leveltemp",
     limit: 1000,
   });
@@ -629,7 +658,7 @@ async function GetShop() {
 
 async function GetTemplateData(colc, id){
   var path = "atomicassets/v1/templates/" + colc + "/" + id;
-  const response = await fetch("https://test.wax.api.atomicassets.io/" + path, {
+  const response = await fetch("https://wax.api.atomicassets.io/" + path, {
     headers: {
       "Content-Type": "text/plain"
     },
@@ -726,7 +755,6 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
   for (let i = 0; i < unstaked.length; i++) {
     ids.push(parseInt(unstaked[i].asset_id));
   }
-
   document.getElementById('balance').innerHTML = balance.toLocaleString('en-US') + " " + symbol;
   colls = document.getElementById('sidebar-content');
   for(var index = 0; index < rates.length; index++){
@@ -748,6 +776,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     unstaked.forEach(element => {
       stakepower+=element.rateperday;
     });
+  document.getElementById('stkpowerid').innerHTML=stakepower.toFixed(4)+" RARC/Hour"
   }
   console.log(stakepower);
   

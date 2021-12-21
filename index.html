@@ -25,7 +25,7 @@
                     <li>
                         <div id="blc" class="blc" style="display: none;">
                             <input class="img" src="./assets/Token.png" type="image"><br>
-                            <p id="balance" class="balance">0.0000 RARc</p>
+                            <p id="balance" class="balance">0.0000 RARC</p>
                         </div>
                     </li>
                     <li>
@@ -63,8 +63,12 @@
                 </div>
                 <div class="secondheader">
                     <ul>
+
+
                         <li>
                             <div id="staking" style="display: none;">
+                                <p class="loadingText" >Stake Power: <span id="stkpowerid" type="value">0.0000 RAREC</span></p>
+                                <p class="loadingText">Time to claim: <span id="timetor" type="value">00:00</span></p>
                             <input class="stakeAllbtn btn" id = "stkall"src="./assets/StakeAll.png" onclick="stakeall()" type="image">
                             <input class="stakeAllbtn btn" src="./assets/wallet.png" onclick="switchstaked(false)" type="image">
                             <input class="stakeAllbtn btn" src="./assets/inv.png" onclick="switchstaked(true)" type="image">
@@ -87,9 +91,9 @@
                     </div>
                 </div>
     <script> 
-        const contract = "rarecitystax";
+        const contract = "rarecitydapp";
         const marketContract = "rarecitymrkt";
-        const symbol = "RAREX";
+        const symbol = "RARC";
     </script>
     <script src="./main.js"></script>
     </div>
