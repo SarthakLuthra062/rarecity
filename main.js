@@ -459,7 +459,7 @@ async function GetAssets(colc,rates) {
               for (let k = 0; k < rates[j].levels.length; k++) {
                 if (rates[j].levels[k].key == level[n].level) {
                   rate = parseFloat(rates[j].levels[k].value);
-                  rate_ = lvl > 1 ? (parseFloat(lvl) - 1) + parseFloat(rate) : rate;
+                  rate_ = lvl > 1 ? parseFloat(lvl)* parseFloat(rate) : rate;
                 }
               }
             }
@@ -469,8 +469,8 @@ async function GetAssets(colc,rates) {
             img: data.data.img,
             name: data.name,
             level_: lvl,
-            price: rate_ * 1000,
-            rateperday: rate_,
+            price: rate_.toFixed(4) * 1000,
+            rateperday: rate_.toFixed(4)*1,
           });
         }
       }
@@ -571,6 +571,7 @@ async function GetBalance() {
 
   const body = await response.json();
 
+    balance=parseFloat(0.0000);
   if (body.rows.length != 0) {
     for (j = 0; j < body.rows.length; j++) {
       if (body.rows[j].balance.includes(symbol))
@@ -721,7 +722,7 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
   var unstaked = switchtostaked ? staked : unstakeasset;
   var pools = "";
   var ids = [];
-
+  var stakepower=0.00;
   for (let i = 0; i < unstaked.length; i++) {
     ids.push(parseInt(unstaked[i].asset_id));
   }
@@ -742,6 +743,13 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     ShowToast("No Assets To Display !");
     return;
   }
+  else
+  {
+    unstaked.forEach(element => {
+      stakepower+=element.rateperday;
+    });
+  }
+  console.log(stakepower);
   
   for (var index = 0; index < unstaked.length; ++index) {
   
@@ -791,9 +799,9 @@ function PopulateMenu(rates,staked, unstakeasset, user, balance) {
     div4.className = 'ratediv';
     var rate = document.createElement('p');
     rate.className = 'ratesText';
-    rate.textContent = unstaked[index].rateperday.toFixed(4);
+    rate.textContent = unstaked[index].rateperday ;
     var sym = document.createElement('p');
-    sym.textContent = symbol;
+    sym.textContent = symbol+"/H";
     div4.appendChild(rate);div4.appendChild(sym);
     container.appendChild(div4);
     items.appendChild(container);
