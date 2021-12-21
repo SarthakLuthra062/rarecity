@@ -604,7 +604,7 @@ async function GetBalance() {
   if (body.rows.length != 0) {
     for (j = 0; j < body.rows.length; j++) {
       if (body.rows[j].balance.includes(symbol))
-        balance = Math.floor(parseFloat(body.rows[j].balance));
+        balance = parseFloat(body.rows[j].balance).toFixed(4);
     }
   }
 
